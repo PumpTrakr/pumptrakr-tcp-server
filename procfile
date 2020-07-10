@@ -1,1 +1,1 @@
-worker: ruby ./tcp_server.rb
+worker: bundle exec ruby ./tcp_server.rb

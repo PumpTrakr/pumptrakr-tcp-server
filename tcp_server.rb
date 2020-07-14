@@ -2,7 +2,7 @@ require 'socket'
 require 'net/http'
 require 'uri'
 require 'json'
-@server = TCPServer.new 3000
+@server = TCPServer.new 3333
 
 def main
   # Servers run forever

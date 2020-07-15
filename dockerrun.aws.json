@@ -1,0 +1,9 @@
+{
+    "AWSEBDockerrunVersion": "1",
+    "Image": {
+        "Name": "tacticalminivan/pumptrakr-tcp-server"
+    },
+    "Ports": [
+        { "ContainerPort": "3333" }
+    ]
+}

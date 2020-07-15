@@ -9,8 +9,7 @@ def main
   loop do
     Thread.start(@server.accept) do |client|
       line = client.recv(1000).strip # Read lines from the socket
-      puts line
-      post_to_server line unless line == '' # method to handle messages from the socket
+      post_to_server(line) unless line == '' # method to handle messages from the socket
       client.close # Disconnect from the client
     end
   end
@@ -31,16 +30,16 @@ def post_to_server(msg)
     http.request(request)
   end
 
-  puts response 
   handle_response(response)
 end
 
 def generate_http_obj(msg)
   # domain
+  protocol = 'https://'
   host = 'pumptrakr-api.herokuapp.com'
   path = '/api/v1/webhooks/tcp_proxy'
 
-  uri = URI.parse("https://#{host}/#{path}")
+  uri = URI.parse("#{protocol}#{host}#{path}")
 
   request = Net::HTTP::Post.new(uri)
   request.content_type = 'application/json; charset=utf-8'
@@ -55,8 +54,6 @@ end
 
 def handle_response(response)
   puts response&.code
-  # puts response&.body
-  # puts response&.message
 
   # Check the status code
   if %w([200 201 204]).include? response.code

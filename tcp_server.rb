@@ -12,7 +12,9 @@ def main
     Thread.start(@server.accept) do |client|
       line = client.recv(1000).strip # Read lines from the socket
       post_to_server(line) unless line == '' # method to handle messages from the socket
-      client.close # Disconnect from the client
+      
+      # Change: Let the module disconnect on its own:
+      # client.close # Disconnect from the client
     end
   end
 end

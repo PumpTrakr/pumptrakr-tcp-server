@@ -26,7 +26,11 @@ class ProxyServer
   def handle(connection)
     request = connection.gets
     puts(request)
-    post_to_server(request) unless request == ''
+    post_to_server(request) unless empty_string?(request) || request.nil?
+  end
+
+  def empty_string?(str)
+    str.strip.empty?
   end
 
   def post_to_server(msg)

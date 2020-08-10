@@ -25,7 +25,7 @@ class ProxyServer
 
   def handle(connection)
     request = connection.gets
-    connection.close if request.nil?
+    # connection.close if request.nil?
     puts(request)
     post_to_server(request) unless empty_string?(request) || request.nil?
   end
@@ -66,11 +66,11 @@ class ProxyServer
   
     [uri, request]
   end
-  
+
   def data_prep(msg)
     { message: msg }.to_json
   end
-  
+
   def handle_response(response)
     puts response&.code
   

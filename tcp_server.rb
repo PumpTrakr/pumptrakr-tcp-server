@@ -55,7 +55,7 @@ class ProxyServer
   def generate_http_obj(msg)
     # domain
     protocol = 'https://'
-    host = 'pumptrakr-api.herokuapp.com'
+    host = 'api.pumptrakr.com'
     path = '/api/v1/webhooks/tcp_proxy'
   
     uri = URI.parse("#{protocol}#{host}#{path}")

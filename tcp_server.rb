@@ -27,7 +27,7 @@ class ProxyServer
     request = connection.gets
     # connection.close if request.nil?
     puts(request)
-    post_to_server(request)
+    post_to_server(request) unless empty_string?(request)
   end
 
   def empty_string?(str)

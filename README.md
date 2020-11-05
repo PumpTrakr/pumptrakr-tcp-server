@@ -5,7 +5,7 @@
 This application is a proxy server designed for the Pumptrakr hardware modules to connect to via TCP, send messages, and forward the messages to the primary application via HTTP. The application accepts arbitrary TCP communications to port 3333, and if the message sent is not blank, it forwards that message via HTTP to the main PumpTrakr application for processing. After posting the received communication, it then disconnects from the client.
 
 ### Deployment Instructions
-
+---
 ##### Login:
 `ssh -i "path/to/admin_key.pem" ubuntu@ec2-3-128-153-169.us-east-2.compute.amazonaws.com`
 
@@ -17,3 +17,17 @@ This application is a proxy server designed for the Pumptrakr hardware modules t
 
 ##### Restart the service:
  `systemctl restart tcp_service`
+
+### Server Commands
+---
+##### To view the TCP traffic coming through
+`sudo tcpdump -v port 3333`
+
+##### To view the default syslog Log
+`tail -f /var/log/syslog`
+
+##### view services 
+`systemctl status`
+
+##### view listening ports
+`netstat -anlp`

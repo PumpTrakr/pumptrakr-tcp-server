@@ -5,10 +5,39 @@ require 'net/http'
 require 'uri'
 require 'json'
 
+def arg_checks
+  # Argument checks
+  if ARGV.length > 1
+    puts 'Too many arguments, only accepted argument is the module type (350, 600)'
+    exit
+  end
+
+  return unless ARGV.length.positive?
+
+  module_model = ARGV[0].to_i
+
+  unless [600, 350].include?(module_model)
+    puts "#{module_model} is not a valid module type. The only valid module types are: 350, 600"
+    exit
+  end
+end
+
+def extract_arg
+  ARGV[0]&.to_i
+end
+
+# Run our argument checks
+arg_checks
+
+# Extract our argument
+module_model = extract_arg
+
+# Define our ProxyServer
 class ProxyServer
-  def initialize(port)
+  def initialize(port, module_model)
+    @model = module_model
     @server = TCPServer.new(port)
-    puts "Listening on port #{port}"
+    puts "Listening on port #{port}\nReceived messages will be delivered to: \n#{generate_uri}"
   end
 
   def start
@@ -24,18 +53,20 @@ class ProxyServer
   private
 
   def handle(connection)
-    request = connection.gets
-    # connection.close if request.nil?
-    puts(request)
-    post_to_server(request) unless empty_string?(request)
+    msg = connection&.gets
+    puts msg
+    if empty_string?(msg)
+      connection.close
+    else
+      post_to_server(msg)
+    end
   end
 
   def empty_string?(str)
-    str.strip.empty?
+    str.nil? || str.strip.empty?
   end
 
   def post_to_server(msg)
-    puts msg
     # Create the request object to use
     uri, request = generate_http_obj(msg)
 
@@ -53,12 +84,7 @@ class ProxyServer
   end
 
   def generate_http_obj(msg)
-    # domain
-    protocol = 'https://'
-    host = 'api.pumptrakr.com'
-    path = '/api/v1/webhooks/tcp_proxy'
-
-    uri = URI.parse("#{protocol}#{host}#{path}")
+    uri = generate_uri
 
     request = Net::HTTP::Post.new(uri)
     request.content_type = 'application/json; charset=utf-8'
@@ -67,13 +93,28 @@ class ProxyServer
     [uri, request]
   end
 
+  def generate_uri
+    base = 'https://api.pumptrakr.com'
+
+    case @model
+    when 600
+      path600 = '/api/v2/webhooks/modules/gv600_messages'
+      url = "#{base}#{path600}"
+    when 350
+      path350 = '/api/v2/webhooks/modules/gv350_messages'
+      url = "#{base}#{path350}"
+    else
+      orig_path = '/api/v1/webhooks/tcp_proxy'
+      url = "#{base}#{orig_path}"
+    end
+    URI.parse(url)
+  end
+
   def data_prep(msg)
     { message: msg }.to_json
   end
 
   def handle_response(response)
-    puts response&.code
-
     # Check the status code
     if %w([200 201 204]).include? response.code
       # Everything worked
@@ -85,5 +126,5 @@ class ProxyServer
   end
 end
 
-server = ProxyServer.new(3333)
+server = ProxyServer.new(3333, module_model)
 server.start

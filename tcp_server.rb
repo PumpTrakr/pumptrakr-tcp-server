@@ -5,10 +5,33 @@ require 'net/http'
 require 'uri'
 require 'json'
 
+def arg_checks
+  # Argument checks
+  if ARGV.length > 1
+    puts 'Too many arguments, only accepted argument is the module type (350, 600)'
+    exit
+  end
+
+  module_model = ARGV[0].to_i
+
+  unless [600, 350].include?(module_model)
+    puts "#{module_model} is not a valid module type. The only valid module types are: 350, 600"
+    exit
+  end
+end
+
+# Run our argument checks
+arg_checks
+
+# Extract our argument
+module_model = ARGV[0].to_i
+
+# Define our ProxyServer
 class ProxyServer
-  def initialize(port)
+  def initialize(port, module_model)
+    @model = module_model
     @server = TCPServer.new(port)
-    puts "Listening on port #{port}"
+    puts "Listening on port #{port}\nReceived messages will be delivered to: \n#{generate_uri}"
   end
 
   def start
@@ -53,18 +76,24 @@ class ProxyServer
   end
 
   def generate_http_obj(msg)
-    # domain
-    protocol = 'https://'
-    host = 'api.pumptrakr.com'
-    path = '/api/v1/webhooks/tcp_proxy'
-
-    uri = URI.parse("#{protocol}#{host}#{path}")
+    uri = generate_uri
 
     request = Net::HTTP::Post.new(uri)
     request.content_type = 'application/json; charset=utf-8'
     request.body = data_prep(msg)
 
     [uri, request]
+  end
+
+  def generate_uri
+    protocol = 'https://'
+    host = 'api.pumptrakr.com'
+    # The various possible paths
+    path600 = '/api/v2/webhooks/modules/gv600_messages'
+    path350 = '/api/v2/webhooks/modules/gv350_messages'
+
+    url = @model == 600 ? "#{protocol}#{host}#{path600}" : "#{protocol}#{host}#{path350}"
+    URI.parse(url)
   end
 
   def data_prep(msg)
@@ -85,5 +114,5 @@ class ProxyServer
   end
 end
 
-server = ProxyServer.new(3333)
+server = ProxyServer.new(3333, module_model)
 server.start

@@ -12,6 +12,8 @@ def arg_checks
     exit
   end
 
+  return unless ARGV.length.positive?
+
   module_model = ARGV[0].to_i
 
   unless [600, 350].include?(module_model)
@@ -20,11 +22,15 @@ def arg_checks
   end
 end
 
+def extract_arg
+  ARGV[0]&.to_i
+end
+
 # Run our argument checks
 arg_checks
 
 # Extract our argument
-module_model = ARGV[0].to_i
+module_model = extract_arg
 
 # Define our ProxyServer
 class ProxyServer
@@ -47,18 +53,20 @@ class ProxyServer
   private
 
   def handle(connection)
-    request = connection.gets
-    # connection.close if request.nil?
-    puts(request)
-    post_to_server(request) unless empty_string?(request)
+    msg = connection&.gets
+    puts msg
+    if empty_string?(msg)
+      connection.close
+    else
+      post_to_server(msg)
+    end
   end
 
   def empty_string?(str)
-    str.strip.empty?
+    str.nil? || str.strip.empty?
   end
 
   def post_to_server(msg)
-    puts msg
     # Create the request object to use
     uri, request = generate_http_obj(msg)
 
@@ -86,13 +94,19 @@ class ProxyServer
   end
 
   def generate_uri
-    protocol = 'https://'
-    host = 'api.pumptrakr.com'
-    # The various possible paths
-    path600 = '/api/v2/webhooks/modules/gv600_messages'
-    path350 = '/api/v2/webhooks/modules/gv350_messages'
+    base = 'https://api.pumptrakr.com'
 
-    url = @model == 600 ? "#{protocol}#{host}#{path600}" : "#{protocol}#{host}#{path350}"
+    case @model
+    when 600
+      path600 = '/api/v2/webhooks/modules/gv600_messages'
+      url = "#{base}#{path600}"
+    when 350
+      path350 = '/api/v2/webhooks/modules/gv350_messages'
+      url = "#{base}#{path350}"
+    else
+      orig_path = '/api/v1/webhooks/tcp_proxy'
+      url = "#{base}#{orig_path}"
+    end
     URI.parse(url)
   end
 
@@ -101,8 +115,6 @@ class ProxyServer
   end
 
   def handle_response(response)
-    puts response&.code
-
     # Check the status code
     if %w([200 201 204]).include? response.code
       # Everything worked

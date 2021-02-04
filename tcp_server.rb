@@ -7,34 +7,54 @@ require 'json'
 
 def arg_checks
   # Argument checks
-  if ARGV.length > 1
-    puts 'Too many arguments, only accepted argument is the module type (350, 600)'
+  if ARGV.length > 3
+    puts 'Too many arguments, must pass in port, environment ("staging", "prod"), and module type (350, 600)'
     exit
   end
 
   return unless ARGV.length.positive?
 
-  module_model = ARGV[0].to_i
+  server_port = ARGV[0]
 
-  unless [600, 350].include?(module_model)
-    puts "#{module_model} is not a valid module type. The only valid module types are: 350, 600"
+  environment = ARGV[1]
+  unless ['local', 'staging', 'prod'].include?(environment)
+    puts "#{environment} is not a valid environment. The only valid environments are local, staging, prod."
+    exit
+  end
+
+  module_model = ARGV[2].to_i
+
+  unless [600, 350, 3333].include?(module_model)
+    puts "#{module_model} is not a valid module type. The only valid module types are: 350, 600, 3333"
     exit
   end
 end
 
-def extract_arg
-  ARGV[0]&.to_i
+def extract_port
+  ARGV[0]
+
+end
+
+def extract_environment
+  ARGV[1]
+end
+
+def extract_module_type
+  ARGV[2]&.to_i
 end
 
 # Run our argument checks
 arg_checks
 
-# Extract our argument
-module_model = extract_arg
+# Extract our arguments
+server_port = extract_port
+environment = extract_environment
+module_model = extract_module_type
 
 # Define our ProxyServer
 class ProxyServer
-  def initialize(port, module_model)
+  def initialize(port, environment, module_model)
+    @environment = environment
     @model = module_model
     @server = TCPServer.new(port)
     puts "Listening on port #{port}\nReceived messages will be delivered to: \n#{generate_uri}"
@@ -94,7 +114,14 @@ class ProxyServer
   end
 
   def generate_uri
-    base = 'https://api.pumptrakr.com'
+    case @environment
+    when 'local'
+      base = 'http://localhost:3000'
+    when 'staging'
+      base = 'https://pumptrakr-api-staging.herokuapp.com'
+    when 'prod'
+      base = 'https://api.pumptrakr.com'
+    end
 
     case @model
     when 600
@@ -126,5 +153,5 @@ class ProxyServer
   end
 end
 
-server = ProxyServer.new(3333, module_model)
+server = ProxyServer.new(server_port, environment, module_model)
 server.start

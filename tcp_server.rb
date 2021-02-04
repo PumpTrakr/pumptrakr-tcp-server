@@ -104,7 +104,7 @@ class ProxyServer
       path350 = '/api/v2/webhooks/modules/gv350_messages'
       url = "#{base}#{path350}"
     else
-      orig_path = '/api/v1/webhooks/tcp_proxy'
+      orig_path = '/api/v2/webhooks/modules/tcp_proxy'
       url = "#{base}#{orig_path}"
     end
     URI.parse(url)

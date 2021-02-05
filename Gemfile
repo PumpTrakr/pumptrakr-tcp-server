@@ -5,8 +5,6 @@ git_source(:github) { |repo| "https://github.com/#{repo}.git" }
 
 ruby '2.7.1'
 
-gem 'logger'
 gem 'json'
-# gem 'socket'
-# gem 'net/http'
+gem 'logger'
 gem 'uri'

@@ -32,7 +32,7 @@ class ProxyServer
 
     @log.debug("(#{init_timestamp}) Message received, this is prior to confirming whether message is empty")
     msg = connection&.gets
-    if empty_string?(msg)
+    if empty_string?(msg, init_timestamp)
       @log.debug("(#{init_timestamp}) Message received, empty message, closing connection")
       connection.close
     else
@@ -41,7 +41,7 @@ class ProxyServer
     end
   end
 
-  def empty_string?(str)
+  def empty_string?(str, init_timestamp)
     @log.debug("(#{init_timestamp}) str: #{str}")
     str.nil? || str.strip.empty?
   end

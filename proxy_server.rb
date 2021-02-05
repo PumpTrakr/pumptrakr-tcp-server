@@ -86,9 +86,9 @@ class ProxyServer
 
   def determine_path
     case @model
-    when 600
+    when 'GV600'
       '/api/v2/webhooks/modules/gv600_messages'
-    when 350
+    when 'GV350'
       '/api/v2/webhooks/modules/gv350_messages'
     else
       '/api/v2/webhooks/modules/tcp_proxy'

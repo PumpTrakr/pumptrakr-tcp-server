@@ -22,9 +22,9 @@ def arg_checks
     exit
   end
 
-  module_model = ARGV[2].to_i
-  unless [600, 350, 3333].include?(module_model)
-    puts "#{module_model} is not a valid module type. The only valid module types are: 350, 600, 3333"
+  module_model = ARGV[2]
+  unless ['GV600', 'GV350', 'ANY'].include?(module_model)
+    puts "#{module_model} is not a valid module type. The only valid module types are: GV350, GV600, ANY"
     exit
   end
 end
@@ -38,7 +38,7 @@ def extract_environment
 end
 
 def extract_module_type
-  ARGV[2]&.to_i
+  ARGV[2]
 end
 
 # Run our argument checks

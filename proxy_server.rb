@@ -42,6 +42,7 @@ class ProxyServer
   end
 
   def empty_string?(str)
+    @log.debug("(#{init_timestamp}) str: #{str}")
     str.nil? || str.strip.empty?
   end
 

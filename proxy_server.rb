@@ -25,6 +25,10 @@ class ProxyServer
   private
 
   def handle(connection, init_timestamp)
+    if connection.closed?
+      connection.close
+    end
+
     msg = connection&.gets
     if empty_string?(msg)
       connection.close

@@ -25,12 +25,12 @@ class ProxyServer
   private
 
   def handle(connection, init_timestamp)
-    @log.debug("(#{init_timestamp}) Message received, this is prior to confirming whether the connection is closed #{msg}")
+    @log.debug("(#{init_timestamp}) Message received, this is prior to confirming whether the connection is closed")
     if connection.closed?
       connection.close
     end
 
-    @log.debug("(#{init_timestamp}) Message received, this is prior to confirming whether message is empty#{msg}")
+    @log.debug("(#{init_timestamp}) Message received, this is prior to confirming whether message is empty")
     msg = connection&.gets
     if empty_string?(msg)
       @log.debug("(#{init_timestamp}) Message received, empty message, closing connection")

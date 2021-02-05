@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'logger'
+Thread.abort_on_exception = true
 
 # Define our ProxyServer
 class ProxyServer
@@ -31,7 +32,7 @@ class ProxyServer
     end
 
     @log.debug("(#{init_timestamp}) Message received, this is prior to confirming whether message is empty")
-    msg = connection&.gets
+    msg = connection.read
     if empty_string?(msg, init_timestamp)
       @log.debug("(#{init_timestamp}) Message received, empty message, closing connection")
       connection.close

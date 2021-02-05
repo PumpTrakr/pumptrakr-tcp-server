@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 
 require 'logger'
 
@@ -7,7 +8,7 @@ class ProxyServer
     @environment = environment
     @model = module_model
     @server = TCPServer.new(port)
-    @log = Logger.new('log.txt', 'daily' )
+    @log = Logger.new("log-#{@environment}-#{@model}.txt", 'daily')
     puts "Listening on port #{port}\nReceived messages will be delivered to: \n#{generate_uri}"
   end
 
@@ -15,7 +16,7 @@ class ProxyServer
     Socket.accept_loop(@server) do |connection|
       Thread.new do
         loop do
-          handle(connection)
+          handle(connection, Time.now.utc.to_i)
         end
       end
     end
@@ -23,13 +24,13 @@ class ProxyServer
 
   private
 
-  def handle(connection)
+  def handle(connection, init_timestamp)
     msg = connection&.gets
     if empty_string?(msg)
       connection.close
     else
-      @log.debug("Message received: #{msg}")
-      post_to_server(msg)
+      @log.debug("(#{init_timestamp}) Message received: #{msg}")
+      post_to_server(msg, init_timestamp)
     end
   end
 
@@ -37,72 +38,87 @@ class ProxyServer
     str.nil? || str.strip.empty?
   end
 
-  def post_to_server(msg)
+  def post_to_server(msg, init_timestamp)
     # Create the request object to use
-    uri, request = generate_http_obj(msg)
+    uri, request = generate_http_obj(msg, init_timestamp)
 
     # Set the options
-    req_options = {
-      use_ssl: uri.scheme == 'https'
-    }
+    req_options = { use_ssl: uri.scheme == 'https' }
 
-    # Make the call
-    response = Net::HTTP.start(uri.hostname, uri.port, req_options) do |http|
-      http.request(request)
+    begin
+      # Make the call
+      response = Net::HTTP.start(uri.hostname, uri.port, req_options) do |http|
+        http.request(request)
+      end
+      handle_response(response, init_timestamp)
+    rescue StandardError => e
+      @log.debug(e.message)
     end
-
-    handle_response(response)
   end
 
-  def generate_http_obj(msg)
+  def generate_http_obj(msg, init_timestamp)
     uri = generate_uri
+    @log.debug("(#{init_timestamp}) URL: #{uri}")
 
-    @log.debug("URL: #{uri}")
     request = Net::HTTP::Post.new(uri)
     request.content_type = 'application/json; charset=utf-8'
     request.body = data_prep(msg)
-
-    @log.debug("Body: #{request.body}")
+    @log.debug("(#{init_timestamp}) Body: #{request.body}")
 
     [uri, request]
   end
 
   def generate_uri
-    case @environment
-    when 'local'
-      base = 'http://localhost:3000'
-    when 'staging'
-      base = 'https://pumptrakr-api-staging.herokuapp.com'
-    when 'prod'
-      base = 'https://api.pumptrakr.com'
-    end
+    base = determine_domain
+    path = determine_path
+    full_url = "#{base}#{path}"
+    URI.parse(full_url)
+  end
 
+  def determine_domain
+    domain_hash = {
+      'local': 'http://localhost:3000',
+      'staging': 'https://pumptrakr-api-staging.herokuapp.com',
+      'prod': 'https://api.pumptrakr.com'
+    }
+    domain_hash[@environment.to_sym]
+  end
+
+  def determine_path
     case @model
     when 600
-      path600 = '/api/v2/webhooks/modules/gv600_messages'
-      url = "#{base}#{path600}"
+      '/api/v2/webhooks/modules/gv600_messages'
     when 350
-      path350 = '/api/v2/webhooks/modules/gv350_messages'
-      url = "#{base}#{path350}"
+      '/api/v2/webhooks/modules/gv350_messages'
     else
-      orig_path = '/api/v2/webhooks/modules/tcp_proxy'
-      url = "#{base}#{orig_path}"
+      '/api/v2/webhooks/modules/tcp_proxy'
     end
-    URI.parse(url)
   end
 
   def data_prep(msg)
     { message: msg }.to_json
   end
 
-  def handle_response(response)
+  def handle_response(response, init_timestamp)
     # Check the status code
-    if %w([200 201 204]).include? response.code
-      # Everything worked
-      puts response.body
+    if [200, 201, 204].include? response.code.to_i
+      handle_successful(response, init_timestamp)
     else
-      # Error!
-      puts "#{response.code} #{response.message}"
+      handle_error(response, init_timestamp)
     end
+  end
+
+  def handle_successful(response, init_timestamp)
+    # Everything worked
+    @log.debug "(#{init_timestamp}) Successfully posted to PumpTrakr"
+    @log.debug "(#{init_timestamp}) Code: #{response.code}"
+    @log.debug "(#{init_timestamp}) Body: #{response.body}"
+  end
+
+  def handle_error(response, init_timestamp)
+    # Error!
+    @log.debug "(#{init_timestamp}) Unsuccessfully posted to PumpTrakr"
+    @log.debug "(#{init_timestamp}) Code: #{response.code}"
+    @log.debug "(#{init_timestamp}) Body: #{response.body}"
   end
 end

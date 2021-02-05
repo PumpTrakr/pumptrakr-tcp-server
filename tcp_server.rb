@@ -10,22 +10,19 @@ require_relative 'proxy_server'
 def arg_checks
   # Argument checks
   if ARGV.length > 3
-    puts 'Too many arguments, must pass in port, environment ("staging", "prod"), and module type (350, 600)'
+    puts 'Too many arguments, must pass in port, environment ("local", "staging", "prod"), and module type (350, 600)'
     exit
   end
 
   return unless ARGV.length.positive?
 
-  server_port = ARGV[0]
-
   environment = ARGV[1]
-  unless ['local', 'staging', 'prod'].include?(environment)
+  unless %w[local staging prod].include?(environment)
     puts "#{environment} is not a valid environment. The only valid environments are local, staging, prod."
     exit
   end
 
   module_model = ARGV[2].to_i
-
   unless [600, 350, 3333].include?(module_model)
     puts "#{module_model} is not a valid module type. The only valid module types are: 350, 600, 3333"
     exit

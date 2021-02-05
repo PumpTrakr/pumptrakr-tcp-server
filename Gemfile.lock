@@ -1,14 +1,20 @@
 GEM
   remote: https://rubygems.org/
   specs:
+    json (2.5.1)
+    logger (1.4.2)
+    uri (0.10.0)
 
 PLATFORMS
   ruby
 
 DEPENDENCIES
+  json
+  logger
+  uri
 
 RUBY VERSION
-   ruby 2.7.0p0
+   ruby 2.7.1p83
 
 BUNDLED WITH
-   2.1.2
+   2.1.4

@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 require 'logger'
-Thread.abort_on_exception = true
 
 # Define our ProxyServer
 class ProxyServer
@@ -16,6 +15,7 @@ class ProxyServer
   def start
     Socket.accept_loop(@server) do |connection|
       Thread.new do
+        Thread.current.abort_on_exception = false
         loop do
           handle(connection, Time.now.utc.to_i)
         end
@@ -26,13 +26,18 @@ class ProxyServer
   private
 
   def handle(connection, init_timestamp)
-    @log.debug("(#{init_timestamp}) Message received, this is prior to confirming whether the connection is closed")
-    if connection.closed?
+    Thread.exit if connection.closed?
+    @log.debug("(#{init_timestamp}) Handle initiation")
+
+    # Read from the socket until it ends
+    msg = extract_message(connection, init_timestamp)
+    @log.debug("(#{init_timestamp}) extracted message: #{msg}")
+
+    if msg.nil?
       connection.close
+      Thread.exit
     end
 
-    @log.debug("(#{init_timestamp}) Message received, this is prior to confirming whether message is empty")
-    msg = connection.read
     if empty_string?(msg, init_timestamp)
       @log.debug("(#{init_timestamp}) Message received, empty message, closing connection")
       connection.close
@@ -40,6 +45,15 @@ class ProxyServer
       @log.debug("(#{init_timestamp}) Message received: #{msg}")
       post_to_server(msg, init_timestamp)
     end
+  end
+
+  def extract_message(connection, init_timestamp)
+    @log.debug("(#{init_timestamp}) extract_message begin")
+
+    return nil if connection.closed?
+
+    # We tell Ruby to use a dollar sign as the custom message terminator character
+    connection.gets('$')
   end
 
   def empty_string?(str, init_timestamp)

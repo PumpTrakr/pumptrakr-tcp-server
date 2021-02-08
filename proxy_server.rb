@@ -101,7 +101,7 @@ class ProxyServer
   def determine_domain
     domain_hash = {
       'local': 'http://localhost:3000',
-      'staging': 'https://pumptrakr-api-staging.herokuapp.com',
+      'staging': 'https://staging-api.pumptrakr.com',
       'prod': 'https://api.pumptrakr.com'
     }
     domain_hash[@environment.to_sym]

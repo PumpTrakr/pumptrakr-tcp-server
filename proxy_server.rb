@@ -8,7 +8,7 @@ class ProxyServer
     @environment = environment
     @model = module_model
     @server = TCPServer.new(port)
-    @log = Logger.new("log-#{@environment}-#{@model}.txt", 'daily')
+    @log = Logger.new("log-#{@environment}-#{@model}.txt", 4, 1_024_000)
     @log.debug "Listening on port #{port}\nReceived messages will be delivered to: \n#{generate_uri}"
   end
 

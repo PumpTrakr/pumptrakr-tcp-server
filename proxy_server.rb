@@ -8,8 +8,8 @@ class ProxyServer
     @environment = environment
     @model = module_model
     @server = TCPServer.new(port)
-    @log = Logger.new("log-#{@environment}-#{@model}.txt", 4, 1_024_000)
-    @log.debug "Listening on port #{port}\nReceived messages will be delivered to: \n#{generate_uri}"
+    # @log = Logger.new("log-#{@environment}-#{@model}.txt", 4, 1_024_000)
+    # @log.debug "Listening on port #{port}\nReceived messages will be delivered to: \n#{generate_uri}"
   end
 
   def start
@@ -27,11 +27,11 @@ class ProxyServer
 
   def handle(connection, init_timestamp)
     Thread.exit if connection.closed?
-    @log.debug("(#{init_timestamp}) Handle initiation")
+    # @log.debug("(#{init_timestamp}) Handle initiation")
 
     # Read from the socket until it ends
     msg = extract_message(connection, init_timestamp)
-    @log.debug("(#{init_timestamp}) extracted message: #{msg}")
+    # @log.debug("(#{init_timestamp}) extracted message: #{msg}")
 
     if msg.nil?
       connection.close
@@ -39,16 +39,16 @@ class ProxyServer
     end
 
     if empty_string?(msg, init_timestamp)
-      @log.debug("(#{init_timestamp}) Message received, empty message, closing connection")
+      # @log.debug("(#{init_timestamp}) Message received, empty message, closing connection")
       connection.close
     else
-      @log.debug("(#{init_timestamp}) Message received: #{msg}")
+      # @log.debug("(#{init_timestamp}) Message received: #{msg}")
       post_to_server(msg, init_timestamp)
     end
   end
 
   def extract_message(connection, init_timestamp)
-    @log.debug("(#{init_timestamp}) extract_message begin")
+    # @log.debug("(#{init_timestamp}) extract_message begin")
 
     return nil if connection.closed?
 
@@ -57,7 +57,7 @@ class ProxyServer
   end
 
   def empty_string?(str, init_timestamp)
-    @log.debug("(#{init_timestamp}) str: #{str}")
+    # @log.debug("(#{init_timestamp}) str: #{str}")
     str.nil? || str.strip.empty?
   end
 
@@ -75,18 +75,18 @@ class ProxyServer
       end
       handle_response(response, init_timestamp)
     rescue StandardError => e
-      @log.debug(e.message)
+      # @log.debug(e.message)
     end
   end
 
   def generate_http_obj(msg, init_timestamp)
     uri = generate_uri
-    @log.debug("(#{init_timestamp}) URL: #{uri}")
+    # @log.debug("(#{init_timestamp}) URL: #{uri}")
 
     request = Net::HTTP::Post.new(uri)
     request.content_type = 'application/json; charset=utf-8'
     request.body = data_prep(msg)
-    @log.debug("(#{init_timestamp}) Body: #{request.body}")
+    # @log.debug("(#{init_timestamp}) Body: #{request.body}")
 
     [uri, request]
   end
@@ -133,15 +133,15 @@ class ProxyServer
 
   def handle_successful(response, init_timestamp)
     # Everything worked
-    @log.debug "(#{init_timestamp}) Successfully posted to PumpTrakr"
-    @log.debug "(#{init_timestamp}) Code: #{response.code}"
-    @log.debug "(#{init_timestamp}) Body: #{response.body}"
+    # @log.debug "(#{init_timestamp}) Successfully posted to PumpTrakr"
+    # @log.debug "(#{init_timestamp}) Code: #{response.code}"
+    # @log.debug "(#{init_timestamp}) Body: #{response.body}"
   end
 
   def handle_error(response, init_timestamp)
     # Error!
-    @log.debug "(#{init_timestamp}) Unsuccessfully posted to PumpTrakr"
-    @log.debug "(#{init_timestamp}) Code: #{response.code}"
-    @log.debug "(#{init_timestamp}) Body: #{response.body}"
+    # @log.debug "(#{init_timestamp}) Unsuccessfully posted to PumpTrakr"
+    # @log.debug "(#{init_timestamp}) Code: #{response.code}"
+    # @log.debug "(#{init_timestamp}) Body: #{response.body}"
   end
 end

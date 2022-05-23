@@ -34,7 +34,6 @@ class ProxyServer
 
     # Read from the socket until it ends
     msg = extract_message(connection, init_timestamp)
-    msg.strip!
     # @log.debug("(#{init_timestamp}) extracted message: #{msg}")
     if msg.nil?
       connection.close

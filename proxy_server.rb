@@ -19,13 +19,8 @@ class ProxyServer
       # @log.debug("Extracted message: #{msg}")
       connection.close if msg.nil? || msg.strip.empty?
 
-      if msg.nil? || msg.strip.empty?
-        # If the message is blank
-        connection.close
-      else
-        # If the message is not blank
-        post_to_server(msg)
-      end
+      # If the message is not blank
+      post_to_server(msg)
     end
   end
 

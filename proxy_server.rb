@@ -17,7 +17,7 @@ class ProxyServer
       msg = connection.gets('$')
 
       # @log.debug("Extracted message: #{msg}")
-      connection.close if msg.nil?
+      connection.close if msg.nil? || msg.strip.empty?
 
       if msg.nil? || msg.strip.empty?
         # If the message is blank

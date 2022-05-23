@@ -8,25 +8,63 @@ class ProxyServer
     @environment = environment
     @model = module_model
     @server = TCPServer.new(port)
+    # @log = Logger.new("log-#{@environment}-#{@model}.txt", 4, 1_024_000)
+    # @log.debug "Listening on port #{port}\nReceived messages will be delivered to: \n#{generate_uri}"
   end
 
   def start
     Socket.accept_loop(@server) do |connection|
-      # Read from the socket until it ends
-      # We tell Ruby to use a dollar sign as the custom message terminator character
-      msg = connection.gets('$')
-
-      # @log.debug("Extracted message: #{msg}")
-      connection.close if msg.nil? || msg.strip.empty?
-
-      # If the message is not blank
-      post_to_server(msg)
+      Thread.current.abort_on_exception = false
+      Thread.new do
+        loop do
+          handle(connection, Time.now.utc.to_i)
+        end
+      end
     end
   end
 
   private
 
-  def post_to_server(msg)
+  def handle(connection, init_timestamp)
+    if connection.closed?
+      connection.close
+      Thread.exit
+    end
+    # @log.debug("(#{init_timestamp}) Handle initiation")
+
+    # Read from the socket until it ends
+    msg = extract_message(connection, init_timestamp)
+    msg.strip!
+    # @log.debug("(#{init_timestamp}) extracted message: #{msg}")
+    if msg.nil?
+      connection.close
+      Thread.exit
+    end
+
+    if empty_string?(msg, init_timestamp)
+      # @log.debug("(#{init_timestamp}) Message received, empty message, closing connection")
+      connection.close
+    else
+      # @log.debug("(#{init_timestamp}) Message received: #{msg}")
+      post_to_server(msg, init_timestamp)
+    end
+  end
+
+  def extract_message(connection, _init_timestamp)
+    # @log.debug("(#{init_timestamp}) extract_message begin")
+
+    return nil if connection.closed?
+
+    # We tell Ruby to use a dollar sign as the custom message terminator character
+    connection.gets('$')
+  end
+
+  def empty_string?(str, _init_timestamp)
+    # @log.debug("(#{init_timestamp}) str: #{str}")
+    str.nil? || str.strip.empty?
+  end
+
+  def post_to_server(msg, init_timestamp)
     # Create the request object to use
     uri, request = generate_http_obj(msg, init_timestamp)
 
@@ -44,12 +82,14 @@ class ProxyServer
     end
   end
 
-  def generate_http_obj(msg)
+  def generate_http_obj(msg, _init_timestamp)
     uri = generate_uri
+    # @log.debug("(#{init_timestamp}) URL: #{uri}")
 
     request = Net::HTTP::Post.new(uri)
     request.content_type = 'application/json; charset=utf-8'
     request.body = data_prep(msg)
+    # @log.debug("(#{init_timestamp}) Body: #{request.body}")
 
     [uri, request]
   end
@@ -85,11 +125,26 @@ class ProxyServer
     { message: msg }.to_json
   end
 
-  def handle_response(response, _init_timestamp)
+  def handle_response(response, init_timestamp)
     # Check the status code
-    case response.code.to_i
-    when 200, 201, 204
-      # If we want to do anything on success
+    if [200, 201, 204].include? response.code.to_i
+      handle_successful(response, init_timestamp)
+    else
+      handle_error(response, init_timestamp)
     end
+  end
+
+  def handle_successful(response, init_timestamp)
+    # Everything worked
+    # @log.debug "(#{init_timestamp}) Successfully posted to PumpTrakr"
+    # @log.debug "(#{init_timestamp}) Code: #{response.code}"
+    # @log.debug "(#{init_timestamp}) Body: #{response.body}"
+  end
+
+  def handle_error(response, init_timestamp)
+    # Error!
+    # @log.debug "(#{init_timestamp}) Unsuccessfully posted to PumpTrakr"
+    # @log.debug "(#{init_timestamp}) Code: #{response.code}"
+    # @log.debug "(#{init_timestamp}) Body: #{response.body}"
   end
 end

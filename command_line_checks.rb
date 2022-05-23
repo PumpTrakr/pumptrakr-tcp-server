@@ -16,7 +16,7 @@ def arg_checks
   end
 
   module_model = ARGV[2]
-  unless ['GV600', 'GV350', 'ANY'].include?(module_model)
+  unless %w[GV600 GV350 ANY].include?(module_model)
     puts "#{module_model} is not a valid module type. The only valid module types are: GV350, GV600, ANY"
     exit
   end

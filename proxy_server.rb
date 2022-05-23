@@ -26,7 +26,7 @@ class ProxyServer
 
   private
 
-  def post_to_server(msg, init_timestamp)
+  def post_to_server(msg)
     # Create the request object to use
     uri, request = generate_http_obj(msg, init_timestamp)
 
@@ -44,7 +44,7 @@ class ProxyServer
     end
   end
 
-  def generate_http_obj(msg, _init_timestamp)
+  def generate_http_obj(msg)
     uri = generate_uri
 
     request = Net::HTTP::Post.new(uri)

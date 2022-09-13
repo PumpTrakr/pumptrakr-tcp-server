@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 require 'logger'
-require 'byebug'
 
 # Define our ProxyServer
 class ProxyTestMsg
@@ -17,7 +16,6 @@ class ProxyTestMsg
 
   def start
     puts "Starting server on port"
-    byebug
     Socket.accept_loop(@server) do |connection|
       Thread.current.abort_on_exception = false
       Thread.new do

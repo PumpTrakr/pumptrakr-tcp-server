@@ -36,6 +36,12 @@ p4 = " WARNING: This will send a message from the TCP server as the device, and 
 
 @confirm_question = [Question.new(p4, '')]
 
+def render_ascii_art
+  banner = File.read("ascii-art.txt")
+  puts banner + "\n"
+  run_cred(@env_questions)
+end
+
 def run_confirm(confirm_question)
   confirm_question.each do |question|
     puts question.prompt
@@ -206,4 +212,4 @@ def run_cred(env_questions)
   end
 end
 
-run_cred(@env_questions)
+render_ascii_art

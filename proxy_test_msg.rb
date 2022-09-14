@@ -6,15 +6,19 @@ require 'logger'
 class ProxyTestMsg
   def initialize(port, environment, module_model, msg)
     @environment = environment
+
     @model = module_model
-    @server = TCPServer.new(port)
+    @server = TCPServer.new(port) if @number_of_runs == 0
     @msg = msg
     puts "hit initialize"
+    @number_of_runs = 0
     # @log = Logger.new("log-#{@environment}-#{@model}.txt", 4, 1_024_000)
     # @log.debug "Listening on port #{port}\nReceived messages will be delivered to: \n#{generate_uri}"
   end
 
+
   def start
+
     puts "Starting server on port"
     Socket.accept_loop(@server) do |connection|
       Thread.current.abort_on_exception = false
@@ -39,8 +43,11 @@ class ProxyTestMsg
       puts "making the call"
       response = Net::HTTP.start(uri.hostname, uri.port, req_options) do |http|
         http.request(request)
+        @server.close!
       end
       handle_response(response, init_timestamp)
+      response.finish
+      @number_of_runs = @number_of_runs + 1
     rescue StandardError => _e
       # @log.debug(e.message)
     end

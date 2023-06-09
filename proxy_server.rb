@@ -113,6 +113,8 @@ class ProxyServer
     case @model
     when 'GV600'
       '/api/v2/webhooks/modules/gv600_messages'
+    when 'GV620'
+      '/api/v2/webhooks/modules/gv600_messages'
     when 'GV350'
       '/api/v2/webhooks/modules/gv350_messages'
     else

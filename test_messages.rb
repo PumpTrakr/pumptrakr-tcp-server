@@ -20,10 +20,9 @@ end
 @environment = ''
 @command = ''
 p1 = "Which Environment is the module on? \n\n1. Production \n2. Staging \n3. Exit"
-p2 = "What is the Model? \n\n1. GV600 \n2. GV350 \n3. Start Over \n4. Exit"
+p2 = "What is the Model? \n\n1. GV600 \n2. GV620 \n3. GV350 \n4. Start Over \n4. Exit"
 p3 = "What message would you like to masquerade as the device, or: \n1. Start Over \n2. Exit"
 p4 = " WARNING: This will send a message from the TCP server as the device, and can not be undone, are you sure? \n\n1. Yes  \n2. Start Over \n3. Exit"
-
 
 @env_questions = [
   Question.new(p1, ''),
@@ -50,7 +49,7 @@ def run_confirm(confirm_question)
     when '1'
       server = ProxyTestMsg.new(server_port = @port, environment = @environment, module_model = @module_model, msg = @command)
       server.post_to_server(msg = @command, Time.now)
-      puts" \n\n
+      puts " \n\n
       ==============================================
         Message sent, check admin panel for status
       ----------------------------------------------
@@ -93,7 +92,7 @@ def run_model(model_questions)
           -------------------------------------------------------------------------\n"
       run_command(@command_question)
     when '2'
-      @module_model = "GV350"
+      @module_model = "GV600"
       puts "\n
           ===========================================
                        MESSAGE INFORMATION
@@ -108,9 +107,24 @@ def run_model(model_questions)
           -------------------------------------------------------------------------\n"
       run_command(@command_question)
     when '3'
+      @module_model = "GV350"
+      puts "\n
+          ===========================================
+                       MESSAGE INFORMATION
+          ===========================================\n
+          -------------------------------------------------------------------------
+         |
+         |       Environment: #{@environment}
+         |       Module: #{@module_model}
+         |       Message to send: < not yet set >
+         |
+         |
+          -------------------------------------------------------------------------\n"
+      run_command(@command_question)
+    when '4'
       puts 'starting over'
       run_cred(@env_questions)
-    when '4'
+    when '5'
       puts 'exiting -- bye'
       exit
     else

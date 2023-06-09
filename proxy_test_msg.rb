@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'logger'
+# require 'byebug'
 
 # Define our ProxyServer
 class ProxyTestMsg
@@ -18,7 +19,7 @@ class ProxyTestMsg
 
 
   def start
-
+    # Start the server
     puts "Starting server on port"
     Socket.accept_loop(@server) do |connection|
       Thread.current.abort_on_exception = false
@@ -30,6 +31,8 @@ class ProxyTestMsg
       end
     end
   end
+
+  #Post Message to the server
   def post_to_server(msg, init_timestamp)
     puts "Sending message: #{msg}"
     # Create the request object to use
@@ -90,6 +93,7 @@ class ProxyTestMsg
   def determine_path
     path_hash = {
 'GV600': '/api/v2/webhooks/modules/gv600_messages',
+'GV620': '/api/v2/webhooks/modules/gv600_messages',
 'GV350': '/api/v2/webhooks/modules/gv350_messages'
     }
     path_hash[@model.to_sym]

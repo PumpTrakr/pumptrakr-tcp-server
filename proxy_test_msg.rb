@@ -86,7 +86,7 @@ class ProxyTestMsg
       'local': 'http://localhost:3000',
       'staging': 'https://staging-api.pumptrakr.com',
       'production': 'https://api.pumptrakr.com',
-      'lees-macbook-pro': 'https//rails.leehodges.work'
+      'lee': 'https//rails.leehodges.work'
     }
     domain_hash[@environment.to_sym]
   end

@@ -19,7 +19,7 @@ end
 @module_model = ''
 @environment = ''
 @command = ''
-p1 = "Which Environment is the module on? \n\n1. Production \n2. Staging \n3. lees-macbook-pro \n4. Exit"
+p1 = "Which Environment is the module on? \n\n1. Production \n2. Staging \n3. lee \n4. Exit"
 p2 = "What is the Model? \n\n1. GV600 \n2. GV620 \n3. GV350 \n4. Start Over \n4. Exit"
 p3 = "What message would you like to masquerade as the device, or: \n1. Start Over \n2. Exit"
 p4 = " WARNING: This will send a message from the TCP server as the device, and can not be undone, are you sure? \n\n1. Yes  \n2. Start Over \n3. Exit"
@@ -217,7 +217,7 @@ def run_cred(env_questions)
           -------------------------------------------------------------------------\n"
       run_model(@module_model_questions)
     when '3'
-      @environment = 'lees-macbook-pro'
+      @environment = 'lee'
       puts "\n
           ===========================================
                        MESSAGE INFORMATION

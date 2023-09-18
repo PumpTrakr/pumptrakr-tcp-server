@@ -66,7 +66,7 @@ class ProxyServerUnthreaded
       'local': 'http://localhost:3000',
       'staging': 'https://staging-api.pumptrakr.com',
       'prod': 'https://api.pumptrakr.com',
-      'lee': 'https//rails.leehodges.work'
+      'lee': 'https://rails.leehodges.work'
     }
     domain_hash[@environment.to_sym]
   end

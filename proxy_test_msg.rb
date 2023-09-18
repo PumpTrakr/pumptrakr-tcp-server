@@ -36,6 +36,7 @@ class ProxyTestMsg
   def post_to_server(msg, init_timestamp)
     puts "Sending message: #{msg}"
     # Create the request object to use
+    puts "#{uri.hostname}"
     uri, request = generate_http_obj(msg, init_timestamp)
 
     # Set the options
@@ -86,7 +87,7 @@ class ProxyTestMsg
       'local': 'http://localhost:3000',
       'staging': 'https://staging-api.pumptrakr.com',
       'production': 'https://api.pumptrakr.com',
-      'lee': 'https//rails.leehodges.work'
+      'lee': 'https://rails.leehodges.work'
     }
     domain_hash[@environment.to_sym]
   end

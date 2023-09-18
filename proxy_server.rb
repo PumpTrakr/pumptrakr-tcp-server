@@ -104,7 +104,8 @@ class ProxyServer
     domain_hash = {
       'local': 'http://localhost:3000',
       'staging': 'https://staging-api.pumptrakr.com',
-      'prod': 'https://api.pumptrakr.com'
+      'prod': 'https://api.pumptrakr.com',
+      'lees-macbook-pro': 'https//rails.leehodges.work'
     }
     domain_hash[@environment.to_sym]
   end

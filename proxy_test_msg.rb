@@ -36,7 +36,7 @@ class ProxyTestMsg
   def post_to_server(msg, init_timestamp)
     puts "Sending message: #{msg}"
     # Create the request object to use
-    puts "#{uri.hostname}"
+    
     uri, request = generate_http_obj(msg, init_timestamp)
 
     # Set the options
